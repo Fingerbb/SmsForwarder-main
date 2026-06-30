@@ -343,10 +343,12 @@
     <string name="sms_command">簡訊指令</string>
     <string name="sms_command_tips">填寫接收簡訊指令的安全手機號，收到 smsf# 開頭簡訊後執行命令</string>
     <string name="sms_forward_phone">廣州簡訊上報</string>
-    <string name="sms_forward_phone_tips">打開後填寫綁定手機號；收到以【廣州市客運交通管理處】廣州從業人員平台：開頭的簡訊會自動上報到接口</string>
+    <string name="sms_forward_phone_tips">打開後分別填寫 SIM1、SIM2 的綁定手機號；收到指定開頭簡訊會按收信卡槽自動上報到接口</string>
     <string name="close_to_earpiece_turn_off_screen">靠近聽筒關屏</string>
     <string name="close_to_earpiece_turn_off_screen_tips">手動關閉系統超時鎖屏後，蓋住聽筒即可關屏並保持喚醒狀態</string>
     <string name="sms_forward_phone_hint">請輸入要上報的綁定手機號</string>
+    <string name="sms_forward_phone_sim1_hint">SIM1 綁定手機號</string>
+    <string name="sms_forward_phone_sim2_hint">SIM2 綁定手機號</string>
     <string name="safe_phone_tips">請輸入安全手機號</string>
     <string name="forward_calls">轉發通話記錄</string>
     <string name="forward_calls_tips">請授予讀取通話記錄、聯繫人等權限，並選擇轉發類型，再開啟</string>

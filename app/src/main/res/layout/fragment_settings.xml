@@ -726,11 +726,20 @@
                         tools:ignore="SmallSp" />
 
                     <com.xuexiang.xui.widget.edittext.ClearEditText
-                        android:id="@+id/et_safe_phone"
+                        android:id="@+id/et_sms_forward_phone_sim1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:digits="0123456789"
-                        android:hint="@string/sms_forward_phone_hint"
+                        android:hint="@string/sms_forward_phone_sim1_hint"
+                        android:inputType="phone"
+                        android:visibility="gone" />
+
+                    <com.xuexiang.xui.widget.edittext.ClearEditText
+                        android:id="@+id/et_sms_forward_phone_sim2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:digits="0123456789"
+                        android:hint="@string/sms_forward_phone_sim2_hint"
                         android:inputType="phone"
                         android:visibility="gone" />
 

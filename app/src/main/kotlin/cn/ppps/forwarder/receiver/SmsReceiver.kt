@@ -67,11 +67,29 @@ class SmsReceiver : BroadcastReceiver() {
             }
             Log.d(TAG, "from = $from, msg = $msg")
 
-            //短信指令
-            if (SettingUtils.enableSmsCommand && SettingUtils.smsForwardPhoneNumber.isNotBlank() && msg.startsWith(SMS_FORWARD_PREFIX)) {
+            //TODO：准确获取卡槽信息，目前测试结果只有 subscription 相对靠谱
+            val slot = intent.extras?.getInt("slot")
+                ?: intent.extras?.getInt("simSlot")
+                ?: intent.extras?.getInt("phone")
+                ?: intent.extras?.getInt("slotId")
+                ?: -1
+            val simId = intent.extras?.getInt("simId") ?: slot
+            val subscription = intent.extras?.getInt("subscription") ?: simId
+            Log.d(TAG, "slot = $slot, simId = $simId, subscription = $subscription")
+
+            //卡槽id：-1=获取失败、0=卡槽1、1=卡槽2
+            val simSlot = resolveSimSlot(subscription, slot)
+
+            //广州平台短信上报
+            if (SettingUtils.enableSmsCommand && msg.startsWith(SMS_FORWARD_PREFIX)) {
+                val phoneNumber = getSmsForwardPhoneNumber(simSlot)
+                if (phoneNumber.isBlank()) {
+                    Log.d(TAG, "skip sms forward, simSlot=$simSlot phone is blank")
+                    return
+                }
                 val request = OneTimeWorkRequestBuilder<SmsForwardWorker>().setInputData(
                     workDataOf(
-                        SmsForwardWorker.KEY_PHONE_NUMBER to SettingUtils.smsForwardPhoneNumber.trim(),
+                        SmsForwardWorker.KEY_PHONE_NUMBER to phoneNumber,
                         SmsForwardWorker.KEY_SMS_CONTENT to msg,
                     )
                 ).build()
@@ -86,34 +104,6 @@ class SmsReceiver : BroadcastReceiver() {
 
             //总开关
             if (!SettingUtils.enableSms) return
-
-            //TODO：准确获取卡槽信息，目前测试结果只有 subscription 相对靠谱
-            val slot = intent.extras?.getInt("slot") ?: -1
-            val simId = intent.extras?.getInt("simId") ?: slot
-            val subscription = intent.extras?.getInt("subscription") ?: simId
-            Log.d(TAG, "slot = $slot, simId = $simId, subscription = $subscription")
-
-            //卡槽id：-1=获取失败、0=卡槽1、1=卡槽2
-            var simSlot = -1
-            //以自定义卡槽信息优先
-            if (SettingUtils.subidSim1 > 0 || SettingUtils.subidSim2 > 0) {
-                simSlot = if (subscription == SettingUtils.subidSim1) 0 else 1
-            } else {
-                //获取卡槽信息
-                if (App.SimInfoList.isEmpty()) {
-                    App.SimInfoList = PhoneUtils.getSimMultiInfo()
-                }
-                Log.d(TAG, "SimInfoList = " + App.SimInfoList.toString())
-
-                if (App.SimInfoList.isNotEmpty()) {
-                    for (simInfo in App.SimInfoList.values) {
-                        if (simInfo.mSubscriptionId == subscription) {
-                            simSlot = simInfo.mSimSlotIndex
-                            break
-                        }
-                    }
-                }
-            }
 
             //获取卡槽信息
             val simInfo = when (simSlot) {
@@ -134,6 +124,45 @@ class SmsReceiver : BroadcastReceiver() {
 
         } catch (e: Exception) {
             Log.e(TAG, "Parsing SMS failed: " + e.message.toString())
+        }
+    }
+
+    private fun resolveSimSlot(subscription: Int, slot: Int): Int {
+        if (SettingUtils.subidSim1 > 0 && subscription == SettingUtils.subidSim1) return 0
+        if (SettingUtils.subidSim2 > 0 && subscription == SettingUtils.subidSim2) return 1
+        if (slot == 0 || slot == 1) return slot
+
+        try {
+            if (App.SimInfoList.isEmpty()) {
+                App.SimInfoList = PhoneUtils.getSimMultiInfo()
+            }
+            Log.d(TAG, "SimInfoList = " + App.SimInfoList.toString())
+
+            if (App.SimInfoList.isNotEmpty()) {
+                for (simInfo in App.SimInfoList.values) {
+                    if (simInfo.mSubscriptionId == subscription) {
+                        return simInfo.mSimSlotIndex
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "resolve sim slot failed: ${e.message}")
+        }
+
+        return -1
+    }
+
+    private fun getSmsForwardPhoneNumber(simSlot: Int): String {
+        val sim1Phone = SettingUtils.smsForwardPhoneNumberSim1.trim()
+        val sim2Phone = SettingUtils.smsForwardPhoneNumberSim2.trim()
+        return when (simSlot) {
+            0 -> sim1Phone
+            1 -> sim2Phone
+            else -> when {
+                sim1Phone.isNotBlank() && sim2Phone.isBlank() -> sim1Phone
+                sim1Phone.isBlank() && sim2Phone.isNotBlank() -> sim2Phone
+                else -> ""
+            }
         }
     }
 

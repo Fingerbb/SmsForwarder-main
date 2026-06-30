@@ -151,7 +151,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         //GPS定位功能
         switchEnableLocation(binding!!.sbEnableLocation, binding!!.layoutLocationSetting, binding!!.rgAccuracy, binding!!.rgPowerRequirement, binding!!.xsbMinInterval, binding!!.xsbMinDistance)
         //短信转发
-        switchEnableSmsForward(binding!!.sbEnableSmsCommand, binding!!.etSafePhone)
+        switchEnableSmsForward(binding!!.sbEnableSmsCommand, binding!!.etSmsForwardPhoneSim1, binding!!.etSmsForwardPhoneSim2)
         //靠近听筒关屏
         switchEnableCloseToEarpieceTurnOffScreen(binding!!.layoutEnableCloseToEarpieceTurnOffScreen, binding!!.sbEnableCloseToEarpieceTurnOffScreen)
         //启动时异步获取已安装App信息
@@ -720,15 +720,18 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
 
     //接受短信指令
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private fun switchEnableSmsForward(sbEnableSmsCommand: SwitchButton, etSafePhone: EditText) {
+    private fun switchEnableSmsForward(sbEnableSmsCommand: SwitchButton, etSim1Phone: EditText, etSim2Phone: EditText) {
         val isEnable = SettingUtils.enableSmsCommand
         sbEnableSmsCommand.isChecked = isEnable
-        etSafePhone.visibility = if (isEnable) View.VISIBLE else View.GONE
-        etSafePhone.setText(SettingUtils.smsForwardPhoneNumber)
+        etSim1Phone.visibility = if (isEnable) View.VISIBLE else View.GONE
+        etSim2Phone.visibility = if (isEnable) View.VISIBLE else View.GONE
+        etSim1Phone.setText(SettingUtils.smsForwardPhoneNumberSim1)
+        etSim2Phone.setText(SettingUtils.smsForwardPhoneNumberSim2)
 
         sbEnableSmsCommand.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             SettingUtils.enableSmsCommand = isChecked
-            etSafePhone.visibility = if (isChecked) View.VISIBLE else View.GONE
+            etSim1Phone.visibility = if (isChecked) View.VISIBLE else View.GONE
+            etSim2Phone.visibility = if (isChecked) View.VISIBLE else View.GONE
             if (isChecked) {
                 XXPermissions.with(this)
                     // 接收短信
@@ -755,11 +758,18 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
                     })
             }
         }
-        etSafePhone.addTextChangedListener(object : TextWatcher {
+        etSim1Phone.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable) {
-                SettingUtils.smsForwardPhoneNumber = etSafePhone.text.toString().trim().removeSuffix("\n")
+                SettingUtils.smsForwardPhoneNumberSim1 = etSim1Phone.text.toString().trim().removeSuffix("\n")
+            }
+        })
+        etSim2Phone.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable) {
+                SettingUtils.smsForwardPhoneNumberSim2 = etSim2Phone.text.toString().trim().removeSuffix("\n")
             }
         })
     }
