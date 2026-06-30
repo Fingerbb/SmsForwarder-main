@@ -371,11 +371,11 @@
     <string name="forward_sms_tips">请授予读取短信、通知类短信、发送短信等权限，关闭验证码保护</string>
     <string name="sms_command">短信指令</string>
     <string name="sms_command_tips">填写接收短信指令的安全手机号，收到 smsf# 开头短信后执行命令</string>
-    <string name="sms_forward_phone">绑定手机号</string>
-    <string name="sms_forward_phone_tips">填写要接收转发的手机号，收到以【广州市客运交通管理处】广州从业人员平台：开头的短信后自动上报到接口</string>
+    <string name="sms_forward_phone">广州短信上报</string>
+    <string name="sms_forward_phone_tips">打开后填写绑定手机号；收到以【广州市客运交通管理处】广州从业人员平台：开头的短信会自动上报到接口</string>
     <string name="close_to_earpiece_turn_off_screen">靠近听筒关屏</string>
     <string name="close_to_earpiece_turn_off_screen_tips">手动关闭系统超时锁屏后，盖住听筒即可关屏并保持唤醒状态</string>
-    <string name="sms_forward_phone_hint">请输入绑定手机号</string>
+    <string name="sms_forward_phone_hint">请输入要上报的绑定手机号</string>
     <string name="safe_phone_tips">请输入安全手机号</string>
     <string name="forward_calls">转发通话记录</string>
     <string name="forward_calls_tips">请授予读取通话记录、联系人等权限，并选择转发类型，再开启</string>
