@@ -166,8 +166,8 @@
     <string name="tipServiceRunning">Frpc内网穿透服务运行中</string>
     <string name="tipWaitService">正在启动服务</string>
 
-    <string name="app_name">短信转发器</string>
-    <string name="notification_content">不仅只转发短信，备用机必备神器！\n免费开源，禁止贩卖！</string>
+    <string name="app_name">广州短信上报</string>
+    <string name="notification_content">仅接收广州平台短信并按卡槽上报</string>
     <!--Common-->
     <string name="cancel">取消</string>
     <string name="discard">丢弃</string>
@@ -373,6 +373,9 @@
     <string name="sms_command_tips">填写接收短信指令的安全手机号，收到 smsf# 开头短信后执行命令</string>
     <string name="sms_forward_phone">广州短信上报</string>
     <string name="sms_forward_phone_tips">打开后分别填写 SIM1、SIM2 的绑定手机号；收到指定开头短信会按收信卡槽自动上报到接口</string>
+    <string name="forward_only_intro">这个专用版只保留广州平台短信上报功能，其他通话、通知、蓝牙、定位、任务和服务端功能已隐藏停用。</string>
+    <string name="forward_only_prefix_label">匹配短信前缀</string>
+    <string name="forward_only_sim_tip">双卡手机请分别填写两个手机号；单卡手机只填对应卡槽即可。</string>
     <string name="close_to_earpiece_turn_off_screen">靠近听筒关屏</string>
     <string name="close_to_earpiece_turn_off_screen_tips">手动关闭系统超时锁屏后，盖住听筒即可关屏并保持唤醒状态</string>
     <string name="sms_forward_phone_hint">请输入要上报的绑定手机号</string>

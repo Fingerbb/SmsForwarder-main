@@ -48,9 +48,7 @@ import cn.ppps.forwarder.utils.Log
 import cn.ppps.forwarder.utils.ProximitySensorScreenHelper
 import cn.ppps.forwarder.utils.SettingUtils
 import cn.ppps.forwarder.utils.SharedPreference
-import cn.ppps.forwarder.utils.sdkinit.UMengInit
 import cn.ppps.forwarder.utils.sdkinit.XBasicLibInit
-import cn.ppps.forwarder.utils.sdkinit.XUpdateInit
 import cn.ppps.forwarder.utils.tinker.TinkerLoadLibrary
 import com.gyf.cactus.Cactus
 import com.gyf.cactus.callback.CactusCallback
@@ -179,12 +177,12 @@ class App : Application(), CactusCallback, Configuration.Provider by Core {
         try {
             context = applicationContext
             initLibs()
-
-            //纯客户端模式
-            if (SettingUtils.enablePureClientMode) return
+            sanitizeForwardOnlySettings()
 
             //初始化WorkManager
             WorkManager.initialize(this, Configuration.Builder().build())
+
+            if (isForwardOnlyMode()) return
 
             //动态加载FrpcLib
             val libPath = filesDir.absolutePath + "/libs"
@@ -321,6 +319,41 @@ class App : Application(), CactusCallback, Configuration.Provider by Core {
         }
     }
 
+    private fun isForwardOnlyMode(): Boolean {
+        return true
+    }
+
+    private fun sanitizeForwardOnlySettings() {
+        SettingUtils.autoCheckUpdate = false
+        SettingUtils.joinPreviewProgram = false
+        SettingUtils.enableSms = false
+        SettingUtils.enablePhone = false
+        SettingUtils.enableCallType1 = false
+        SettingUtils.enableCallType2 = false
+        SettingUtils.enableCallType3 = false
+        SettingUtils.enableCallType4 = false
+        SettingUtils.enableCallType5 = false
+        SettingUtils.enableCallType6 = false
+        SettingUtils.enableAppNotify = false
+        SettingUtils.enableCancelAppNotify = false
+        SettingUtils.enableNotUserPresent = false
+        SettingUtils.enableCloseToEarpieceTurnOffScreen = false
+        SettingUtils.enableLoadAppList = false
+        SettingUtils.enableLoadUserAppList = false
+        SettingUtils.enableLoadSystemAppList = false
+        SettingUtils.enableExcludeFromRecents = false
+        SettingUtils.enableCactus = false
+        SettingUtils.enablePlaySilenceMusic = false
+        SettingUtils.enableOnePixelActivity = false
+        SettingUtils.enableSmsTemplate = false
+        SettingUtils.enablePureClientMode = false
+        SettingUtils.enablePureTaskMode = false
+        SettingUtils.enableDebugMode = false
+        SettingUtils.enableLocation = false
+        SettingUtils.enableBluetooth = false
+        SettingUtils.smsCommandSafePhone = ""
+    }
+
     /**
      * 初始化基础库
      */
@@ -335,10 +368,6 @@ class App : Application(), CactusCallback, Configuration.Provider by Core {
         Log.init(applicationContext)
         // 转发历史工具类初始化
         HistoryUtils.init(applicationContext)
-        // 版本更新初始化
-        XUpdateInit.init(this)
-        // 运营统计数据
-        UMengInit.init(this)
         // 初始化语种切换框架
         MultiLanguages.init(this)
         // 设置语种变化监听器
