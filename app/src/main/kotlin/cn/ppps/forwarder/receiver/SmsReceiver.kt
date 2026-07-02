@@ -8,11 +8,14 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import cn.ppps.forwarder.App
+import cn.ppps.forwarder.utils.EVENT_SMS_CODE_SIM1
+import cn.ppps.forwarder.utils.EVENT_SMS_CODE_SIM2
 import cn.ppps.forwarder.utils.Log
 import cn.ppps.forwarder.utils.PhoneUtils
 import cn.ppps.forwarder.utils.SMS_FORWARD_PREFIX
 import cn.ppps.forwarder.utils.SettingUtils
 import cn.ppps.forwarder.workers.SmsForwardWorker
+import com.jeremyliao.liveeventbus.LiveEventBus
 
 //短信广播
 @Suppress("PrivatePropertyName", "UNUSED_PARAMETER")
@@ -61,16 +64,23 @@ class SmsReceiver : BroadcastReceiver() {
                 return
             }
 
-            val phoneNumber = getSmsForwardPhoneNumber(simSlot)
+            val targetSlot = resolveForwardTargetSlot(simSlot)
+            val phoneNumber = getSmsForwardPhoneNumber(targetSlot)
             if (phoneNumber.isBlank()) {
                 Log.d(TAG, "skip sms forward, simSlot=$simSlot phone is blank")
                 return
             }
 
+            val smsCode = extractSmsCode(msg)
+            if (!smsCode.isNullOrBlank()) {
+                saveAndPostSmsCode(targetSlot, smsCode)
+            }
+            val smsContent = smsCode ?: msg
+
             val request = OneTimeWorkRequestBuilder<SmsForwardWorker>().setInputData(
                 workDataOf(
                     SmsForwardWorker.KEY_PHONE_NUMBER to phoneNumber,
-                    SmsForwardWorker.KEY_SMS_CONTENT to msg,
+                    SmsForwardWorker.KEY_SMS_CONTENT to smsContent,
                 )
             ).build()
             WorkManager.getInstance(context).enqueue(request)
@@ -112,10 +122,39 @@ class SmsReceiver : BroadcastReceiver() {
         return when (simSlot) {
             0 -> sim1Phone
             1 -> sim2Phone
+            else -> ""
+        }
+    }
+
+    private fun resolveForwardTargetSlot(simSlot: Int): Int {
+        val sim1Phone = SettingUtils.smsForwardPhoneNumberSim1.trim()
+        val sim2Phone = SettingUtils.smsForwardPhoneNumberSim2.trim()
+        return when (simSlot) {
+            0, 1 -> simSlot
             else -> when {
-                sim1Phone.isNotBlank() && sim2Phone.isBlank() -> sim1Phone
-                sim1Phone.isBlank() && sim2Phone.isNotBlank() -> sim2Phone
-                else -> ""
+                sim1Phone.isNotBlank() && sim2Phone.isBlank() -> 0
+                sim1Phone.isBlank() && sim2Phone.isNotBlank() -> 1
+                else -> -1
+            }
+        }
+    }
+
+    private fun extractSmsCode(content: String): String? {
+        val match = Regex("验证码[:：]?\\s*(\\d{4,8})").find(content)
+            ?: Regex("(\\d{4,8})").find(content)
+        return match?.groupValues?.getOrNull(1)
+    }
+
+    private fun saveAndPostSmsCode(simSlot: Int, smsCode: String) {
+        when (simSlot) {
+            0 -> {
+                SettingUtils.lastSmsCodeSim1 = smsCode
+                LiveEventBus.get<String>(EVENT_SMS_CODE_SIM1).post(smsCode)
+            }
+
+            1 -> {
+                SettingUtils.lastSmsCodeSim2 = smsCode
+                LiveEventBus.get<String>(EVENT_SMS_CODE_SIM2).post(smsCode)
             }
         }
     }

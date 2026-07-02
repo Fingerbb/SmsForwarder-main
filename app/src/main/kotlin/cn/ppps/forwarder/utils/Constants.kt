@@ -57,6 +57,8 @@ const val SP_ENABLE_CLOSE_TO_EARPIECE_TURN_OFF_SCREEN = "enable_close_2_earpiece
 const val SP_SMS_COMMAND_SAFE_PHONE = "sms_command_safe_phone"
 const val SP_SMS_FORWARD_PHONE_NUMBER = "sms_forward_phone_number"
 const val SP_SMS_FORWARD_PHONE_NUMBER_SIM2 = "sms_forward_phone_number_sim2"
+const val SP_LAST_SMS_CODE_SIM1 = "last_sms_code_sim1"
+const val SP_LAST_SMS_CODE_SIM2 = "last_sms_code_sim2"
 
 const val SMS_FORWARD_PREFIX = "【广州市客运交通管理处】广州从业人员平台"
 const val SMS_FORWARD_URL = "http://118.25.141.237:42333/api/User/update-sms-phone"
@@ -195,6 +197,8 @@ const val KEY_TASK_TYPE = "key_task_type"
 const val KEY_TASK_CLONE = "key_task_clone"
 
 const val EVENT_LOAD_APP_LIST = "EVENT_LOAD_APP_LIST"
+const val EVENT_SMS_CODE_SIM1 = "EVENT_SMS_CODE_SIM1"
+const val EVENT_SMS_CODE_SIM2 = "EVENT_SMS_CODE_SIM2"
 
 const val EVENT_KEY_SIM_SLOT = "EVENT_KEY_SIM_SLOT"
 const val EVENT_KEY_PHONE_NUMBERS = "EVENT_KEY_PHONE_NUMBERS"

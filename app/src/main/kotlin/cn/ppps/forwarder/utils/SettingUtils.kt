@@ -51,6 +51,8 @@ class SettingUtils private constructor() {
         var enableCloseToEarpieceTurnOffScreen: Boolean by SharedPreference(SP_ENABLE_CLOSE_TO_EARPIECE_TURN_OFF_SCREEN, false)
         var smsForwardPhoneNumberSim1: String by SharedPreference(SP_SMS_FORWARD_PHONE_NUMBER, "")
         var smsForwardPhoneNumberSim2: String by SharedPreference(SP_SMS_FORWARD_PHONE_NUMBER_SIM2, "")
+        var lastSmsCodeSim1: String by SharedPreference(SP_LAST_SMS_CODE_SIM1, "")
+        var lastSmsCodeSim2: String by SharedPreference(SP_LAST_SMS_CODE_SIM2, "")
 
         //是否转发应用通知——自动消除通知
         var enableCancelAppNotify: Boolean by SharedPreference(SP_ENABLE_CANCEL_APP_NOTIFY, false)

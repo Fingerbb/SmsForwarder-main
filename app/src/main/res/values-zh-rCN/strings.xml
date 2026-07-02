@@ -137,7 +137,7 @@
     <string name="tipServiceRunning">Frpc内网穿透服务运行中</string>
     <string name="tipWaitService">正在启动服务</string>
 
-    <string name="app_name">广州短信上报</string>
+    <string name="app_name">出租车从业资格抢号</string>
     <string name="notification_content">仅接收广州平台短信并按卡槽上报</string>
     <!--Common-->
     <string name="cancel">取消</string>
@@ -354,12 +354,21 @@
     <string name="forward_only_query_phone_empty">请至少填写一个手机号</string>
     <string name="forward_only_sim1_label">卡1</string>
     <string name="forward_only_sim2_label">卡2</string>
-    <string name="forward_only_query_result_format">%1$s：%2$s %3$s</string>
-    <string name="forward_only_query_result_empty">%1$s：未填写手机号</string>
-    <string name="forward_only_query_result_failed">%1$s：查询失败</string>
-    <string name="forward_only_query_result_querying">%1$s：查询中...</string>
-    <string name="forward_only_query_result_sim1_empty">卡1：未查询</string>
-    <string name="forward_only_query_result_sim2_empty">卡2：未查询</string>
+    <string name="forward_only_sim1_phone_label">本机号码(SIM1)</string>
+    <string name="forward_only_sim2_phone_label">本机号码(SIM2)</string>
+    <string name="forward_only_query_result_format">抢号类型：%1$s\n用户名：%2$s</string>
+    <string name="forward_only_query_result_empty">抢号类型：-\n用户名：-</string>
+    <string name="forward_only_query_result_failed">抢号类型：查询失败\n用户名：-</string>
+    <string name="forward_only_query_result_querying">抢号类型：查询中...\n用户名：-</string>
+    <string name="forward_only_query_result_sim1_empty">抢号类型：-\n用户名：-</string>
+    <string name="forward_only_query_result_sim2_empty">抢号类型：-\n用户名：-</string>
+    <string name="forward_only_code_tip">验证码 收到验证码但没有自动回填，尽快手动输入发送</string>
+    <string name="forward_only_code_hint">手动输入验证码</string>
+    <string name="forward_only_sending">发送中...</string>
+    <string name="forward_only_send_phone_empty">请先填写对应卡槽的本机号码</string>
+    <string name="forward_only_send_code_empty">请先填写验证码</string>
+    <string name="forward_only_send_success">发送成功</string>
+    <string name="forward_only_send_failed">发送失败</string>
     <string name="safe_phone_tips">请输入安全手机号</string>
     <string name="forward_calls">转发通话记录</string>
     <string name="forward_calls_tips">请授予读取通话记录、联系人等权限，并选择转发类型，再开启</string>
