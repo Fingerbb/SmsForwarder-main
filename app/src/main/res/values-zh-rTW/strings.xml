@@ -349,6 +349,17 @@
     <string name="sms_forward_phone_hint">請輸入要上報的綁定手機號</string>
     <string name="sms_forward_phone_sim1_hint">SIM1 綁定手機號</string>
     <string name="sms_forward_phone_sim2_hint">SIM2 綁定手機號</string>
+    <string name="forward_only_query">查詢</string>
+    <string name="forward_only_querying">查詢中...</string>
+    <string name="forward_only_query_phone_empty">請至少填寫一個手機號</string>
+    <string name="forward_only_sim1_label">卡1</string>
+    <string name="forward_only_sim2_label">卡2</string>
+    <string name="forward_only_query_result_format">%1$s：%2$s %3$s</string>
+    <string name="forward_only_query_result_empty">%1$s：未填寫手機號</string>
+    <string name="forward_only_query_result_failed">%1$s：查詢失敗</string>
+    <string name="forward_only_query_result_querying">%1$s：查詢中...</string>
+    <string name="forward_only_query_result_sim1_empty">卡1：未查詢</string>
+    <string name="forward_only_query_result_sim2_empty">卡2：未查詢</string>
     <string name="safe_phone_tips">請輸入安全手機號</string>
     <string name="forward_calls">轉發通話記錄</string>
     <string name="forward_calls_tips">請授予讀取通話記錄、聯繫人等權限，並選擇轉發類型，再開啟</string>

@@ -376,6 +376,17 @@
     <string name="forward_only_intro">这个专用版只保留广州平台短信上报功能，其他通话、通知、蓝牙、定位、任务和服务端功能已隐藏停用。</string>
     <string name="forward_only_prefix_label">匹配短信前缀</string>
     <string name="forward_only_sim_tip">双卡手机请分别填写两个手机号；单卡手机只填对应卡槽即可。</string>
+    <string name="forward_only_query">查询</string>
+    <string name="forward_only_querying">查询中...</string>
+    <string name="forward_only_query_phone_empty">请至少填写一个手机号</string>
+    <string name="forward_only_sim1_label">卡1</string>
+    <string name="forward_only_sim2_label">卡2</string>
+    <string name="forward_only_query_result_format">%1$s：%2$s %3$s</string>
+    <string name="forward_only_query_result_empty">%1$s：未填写手机号</string>
+    <string name="forward_only_query_result_failed">%1$s：查询失败</string>
+    <string name="forward_only_query_result_querying">%1$s：查询中...</string>
+    <string name="forward_only_query_result_sim1_empty">卡1：未查询</string>
+    <string name="forward_only_query_result_sim2_empty">卡2：未查询</string>
     <string name="close_to_earpiece_turn_off_screen">靠近听筒关屏</string>
     <string name="close_to_earpiece_turn_off_screen_tips">手动关闭系统超时锁屏后，盖住听筒即可关屏并保持唤醒状态</string>
     <string name="sms_forward_phone_hint">请输入要上报的绑定手机号</string>

@@ -58,8 +58,9 @@ const val SP_SMS_COMMAND_SAFE_PHONE = "sms_command_safe_phone"
 const val SP_SMS_FORWARD_PHONE_NUMBER = "sms_forward_phone_number"
 const val SP_SMS_FORWARD_PHONE_NUMBER_SIM2 = "sms_forward_phone_number_sim2"
 
-const val SMS_FORWARD_PREFIX = "【广州市客运交通管理处】广州从业人员平台："
+const val SMS_FORWARD_PREFIX = "【广州市客运交通管理处】广州从业人员平台"
 const val SMS_FORWARD_URL = "http://118.25.141.237:42333/api/User/update-sms-phone"
+const val SMS_USER_INFO_URL = "http://118.25.141.237:42333/api/User/user-info-phone"
 
 const val ENABLE_LOAD_APP_LIST = "enable_load_app_list"
 const val ENABLE_LOAD_USER_APP_LIST = "enable_load_user_app_list"

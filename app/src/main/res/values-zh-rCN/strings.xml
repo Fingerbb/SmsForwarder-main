@@ -349,6 +349,17 @@
     <string name="sms_forward_phone_hint">请输入要上报的绑定手机号</string>
     <string name="sms_forward_phone_sim1_hint">SIM1 绑定手机号</string>
     <string name="sms_forward_phone_sim2_hint">SIM2 绑定手机号</string>
+    <string name="forward_only_query">查询</string>
+    <string name="forward_only_querying">查询中...</string>
+    <string name="forward_only_query_phone_empty">请至少填写一个手机号</string>
+    <string name="forward_only_sim1_label">卡1</string>
+    <string name="forward_only_sim2_label">卡2</string>
+    <string name="forward_only_query_result_format">%1$s：%2$s %3$s</string>
+    <string name="forward_only_query_result_empty">%1$s：未填写手机号</string>
+    <string name="forward_only_query_result_failed">%1$s：查询失败</string>
+    <string name="forward_only_query_result_querying">%1$s：查询中...</string>
+    <string name="forward_only_query_result_sim1_empty">卡1：未查询</string>
+    <string name="forward_only_query_result_sim2_empty">卡2：未查询</string>
     <string name="safe_phone_tips">请输入安全手机号</string>
     <string name="forward_calls">转发通话记录</string>
     <string name="forward_calls_tips">请授予读取通话记录、联系人等权限，并选择转发类型，再开启</string>

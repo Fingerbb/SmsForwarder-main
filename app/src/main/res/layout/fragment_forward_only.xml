@@ -111,6 +111,31 @@
                     android:text="@string/forward_only_sim_tip"
                     android:textColor="@color/xui_config_color_gray_6"
                     android:textSize="@dimen/text_size_small" />
+
+                <Button
+                    android:id="@+id/btn_query_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/forward_only_query" />
+
+                <TextView
+                    android:id="@+id/tv_query_result_sim1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/forward_only_query_result_sim1_empty"
+                    android:textColor="@color/xui_config_color_gray_8"
+                    android:textSize="@dimen/text_size_medium" />
+
+                <TextView
+                    android:id="@+id/tv_query_result_sim2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/forward_only_query_result_sim2_empty"
+                    android:textColor="@color/xui_config_color_gray_8"
+                    android:textSize="@dimen/text_size_medium" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
