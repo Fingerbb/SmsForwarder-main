@@ -5,6 +5,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import cn.ppps.forwarder.App
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
@@ -12,8 +13,10 @@ import com.hjq.permissions.permission.base.IPermission
 import cn.ppps.forwarder.R
 import cn.ppps.forwarder.core.BaseFragment
 import cn.ppps.forwarder.databinding.FragmentForwardOnlyBinding
+import cn.ppps.forwarder.utils.Log
 import cn.ppps.forwarder.utils.EVENT_SMS_CODE_SIM1
 import cn.ppps.forwarder.utils.EVENT_SMS_CODE_SIM2
+import cn.ppps.forwarder.utils.PhoneUtils
 import cn.ppps.forwarder.utils.SMS_FORWARD_URL
 import cn.ppps.forwarder.utils.SMS_USER_INFO_URL
 import cn.ppps.forwarder.utils.SettingUtils
@@ -32,6 +35,8 @@ import java.nio.charset.StandardCharsets
 
 @Page(name = "广州短信上报")
 class ForwardOnlyFragment : BaseFragment<FragmentForwardOnlyBinding?>() {
+
+    private val TAG = ForwardOnlyFragment::class.java.simpleName
 
     override fun viewBindingInflate(
         inflater: LayoutInflater,
@@ -76,8 +81,34 @@ class ForwardOnlyFragment : BaseFragment<FragmentForwardOnlyBinding?>() {
                         return
                     }
                     SettingUtils.enableSmsCommand = true
+                    bindSimCardsFromDevice()
                 }
             })
+    }
+
+    private fun bindSimCardsFromDevice() {
+        try {
+            App.SimInfoList = PhoneUtils.getSimMultiInfo()
+            if (App.SimInfoList.isEmpty()) {
+                XToastUtils.error(R.string.tip_can_not_get_sim_infos)
+                XXPermissions.startPermissionActivity(
+                    requireContext(), PermissionLists.getReadPhoneStatePermission()
+                )
+                return
+            }
+            Log.d(TAG, App.SimInfoList.toString())
+
+            App.SimInfoList[0]?.let { simInfo ->
+                SettingUtils.subidSim1 = simInfo.mSubscriptionId
+                SettingUtils.extraSim1 = simInfo.mCarrierName.toString() + "_" + simInfo.mNumber.toString()
+            }
+            App.SimInfoList[1]?.let { simInfo ->
+                SettingUtils.subidSim2 = simInfo.mSubscriptionId
+                SettingUtils.extraSim2 = simInfo.mCarrierName.toString() + "_" + simInfo.mNumber.toString()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "bind sim cards failed: ${e.message}")
+        }
     }
 
     private fun bindPhoneFields() {

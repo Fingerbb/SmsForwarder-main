@@ -675,7 +675,7 @@ class PhoneUtils private constructor() {
          * @param mId SubscriptionId
          * @param isSimId 是否已经是SimId无需转换（待做机型兼容）
          */
-        private fun getSimId(mId: Int, isSimId: Boolean): Int {
+        fun getSimId(mId: Int, isSimId: Boolean): Int {
             Log.i(TAG, "mId = $mId, isSimId = $isSimId")
             if (isSimId) return mId
 
