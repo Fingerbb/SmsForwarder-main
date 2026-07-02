@@ -138,16 +138,10 @@ class ForwardOnlyFragment : BaseFragment<FragmentForwardOnlyBinding?>() {
             XToastUtils.success(R.string.tipSaveSuccess)
         }
         binding!!.btnReset.setOnClickListener {
-            SettingUtils.smsForwardPhoneNumberSim1 = ""
-            SettingUtils.smsForwardPhoneNumberSim2 = ""
             SettingUtils.lastSmsCodeSim1 = ""
             SettingUtils.lastSmsCodeSim2 = ""
-            binding!!.etPhoneSim1.setText("")
-            binding!!.etPhoneSim2.setText("")
             binding!!.etCodeSim1.setText("")
             binding!!.etCodeSim2.setText("")
-            binding!!.tvQueryResultSim1.setText(R.string.forward_only_query_result_sim1_empty)
-            binding!!.tvQueryResultSim2.setText(R.string.forward_only_query_result_sim2_empty)
         }
     }
 
