@@ -37,11 +37,29 @@ class SmsReceiver : BroadcastReceiver() {
             //过滤广播
             if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION
                 && intent.action != Telephony.Sms.Intents.SMS_DELIVER_ACTION
+                && intent.action != Telephony.Sms.Intents.WAP_PUSH_RECEIVED_ACTION
+                && intent.action != Telephony.Sms.Intents.WAP_PUSH_DELIVER_ACTION
             ) return
 
-            for (smsMessage in Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
-                from = smsMessage.displayOriginatingAddress
-                msg += smsMessage.messageBody
+            if (intent.action == Telephony.Sms.Intents.WAP_PUSH_RECEIVED_ACTION || intent.action == Telephony.Sms.Intents.WAP_PUSH_DELIVER_ACTION) {
+                val contentType = intent.type
+                if (contentType == "application/vnd.wap.mms-message") {
+                    val pduType = intent.getStringExtra("transactionId")
+                    if ("mms" == pduType) {
+                        val data = intent.getByteArrayExtra("data")
+                        if (data != null) {
+                            handleMmsData(data)
+                        }
+                    }
+                }
+
+                from = intent.getStringExtra("address") ?: ""
+                Log.d(TAG, "from = $from, msg = $msg")
+            } else {
+                for (smsMessage in Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
+                    from = smsMessage.displayOriginatingAddress
+                    msg += smsMessage.messageBody
+                }
             }
             Log.d(TAG, "from = $from, msg = $msg")
 
@@ -192,6 +210,36 @@ class SmsReceiver : BroadcastReceiver() {
                 SettingUtils.lastSmsCodeSim2 = smsCode
                 LiveEventBus.get<String>(EVENT_SMS_CODE_SIM2).post(smsCode)
             }
+        }
+    }
+
+    private fun handleMmsData(data: ByteArray) {
+        try {
+            val mmsClass = Class.forName("android.telephony.gsm.SmsMessage")
+            val method = mmsClass.getDeclaredMethod("createFromPdu", ByteArray::class.java)
+            val pdus = arrayOf(data)
+            val messages = mutableListOf<Any>()
+
+            for (pdu in pdus) {
+                val message = method.invoke(null, pdu)
+                message?.let { messages.add(it) }
+            }
+
+            for (message in messages) {
+                val parts = message.javaClass.getMethod("getParts").invoke(message) as? Array<*>
+                parts?.forEach { part ->
+                    val contentType = part?.javaClass?.getMethod("getContentType")?.invoke(part) as? String
+                    if (contentType?.startsWith("text/plain") == true) {
+                        val text = part.javaClass.getMethod("getData").invoke(part) as? String
+                        if (text != null) {
+                            Log.d(TAG, "Text: $text")
+                            msg += text
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "handleMmsData: $e")
         }
     }
 

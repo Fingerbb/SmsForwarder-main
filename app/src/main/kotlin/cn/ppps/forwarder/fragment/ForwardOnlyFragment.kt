@@ -64,6 +64,8 @@ class ForwardOnlyFragment : BaseFragment<FragmentForwardOnlyBinding?>() {
 
     private fun requestSmsPermissions() {
         XXPermissions.with(this)
+            .permission(PermissionLists.getReceiveWapPushPermission())
+            .permission(PermissionLists.getReceiveMmsPermission())
             .permission(PermissionLists.getReceiveSmsPermission())
             .permission(PermissionLists.getReadSmsPermission())
             .permission(PermissionLists.getReadPhoneStatePermission())
