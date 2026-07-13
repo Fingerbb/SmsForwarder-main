@@ -109,23 +109,8 @@ class SmsReceiver : BroadcastReceiver() {
             val simSlot = PhoneUtils.getSimId(subscription, isSimId)
             if (simSlot == 0 || simSlot == 1) return simSlot
         }
-        val smsListSimSlot = resolveSimSlotFromSmsList()
-        if (smsListSimSlot == 0 || smsListSimSlot == 1) return smsListSimSlot
         if (slot == 0 || slot == 1) return slot
         return -1
-    }
-
-    private fun resolveSimSlotFromSmsList(): Int {
-        return try {
-            val smsInfoList = PhoneUtils.getSmsInfoList(1, 5, 0, msg)
-            val smsInfo = smsInfoList.firstOrNull { it.content == msg } ?: smsInfoList.firstOrNull()
-            val simSlot = smsInfo?.simId ?: -1
-            Log.d(TAG, "sms list simSlot = $simSlot, smsInfo = $smsInfo")
-            simSlot
-        } catch (e: Exception) {
-            Log.e(TAG, "resolve sim slot from sms list failed: ${e.message}")
-            -1
-        }
     }
 
     private fun getSubscriptionCandidate(intent: Intent): Pair<Int, Boolean> {
