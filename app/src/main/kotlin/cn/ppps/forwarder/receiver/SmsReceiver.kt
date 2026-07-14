@@ -16,7 +16,12 @@ import cn.ppps.forwarder.utils.SMS_FORWARD_PREFIX
 import cn.ppps.forwarder.utils.SettingUtils
 import cn.ppps.forwarder.workers.SmsForwardWorker
 import com.jeremyliao.liveeventbus.LiveEventBus
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.math.abs
 
 //短信广播
 @Suppress("PrivatePropertyName", "UNUSED_PARAMETER")
@@ -30,6 +35,7 @@ class SmsReceiver : BroadcastReceiver() {
         try {
             from = ""
             msg = ""
+            var receiveTime = System.currentTimeMillis()
 
             //纯客户端模式
             if (SettingUtils.enablePureClientMode) return
@@ -59,6 +65,7 @@ class SmsReceiver : BroadcastReceiver() {
                 for (smsMessage in Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
                     from = smsMessage.displayOriginatingAddress
                     msg += smsMessage.messageBody
+                    receiveTime = smsMessage.timestampMillis
                 }
             }
             Log.d(TAG, "from = $from, msg = $msg")
@@ -78,25 +85,17 @@ class SmsReceiver : BroadcastReceiver() {
             //卡槽id：-1=获取失败、0=卡槽1、1=卡槽2
             val simSlot = resolveSimSlot(subscription, subscriptionCandidate.second, slot)
             val targetSlot = resolveForwardTargetSlot(simSlot)
-            val phoneNumber = getSmsForwardPhoneNumber(targetSlot)
-            if (phoneNumber.isBlank()) {
-                Log.d(TAG, "skip sms forward, simSlot=$simSlot phone is blank")
+            if (targetSlot == -1) {
+                if (simSlot == -1) {
+                    Log.d(TAG, "sim slot unknown, try resolve from sms list")
+                    forwardAfterResolvingFromSmsList(context.applicationContext, msg, receiveTime)
+                } else {
+                    Log.d(TAG, "skip sms forward, simSlot=$simSlot phone is blank")
+                }
                 return
             }
 
-            val smsCode = extractSmsCode(msg)
-            if (!smsCode.isNullOrBlank()) {
-                saveAndPostSmsCode(targetSlot, smsCode)
-            }
-            val smsContent = smsCode ?: msg
-
-            val request = OneTimeWorkRequestBuilder<SmsForwardWorker>().setInputData(
-                workDataOf(
-                    SmsForwardWorker.KEY_PHONE_NUMBER to phoneNumber,
-                    SmsForwardWorker.KEY_SMS_CONTENT to smsContent,
-                )
-            ).build()
-            WorkManager.getInstance(context).enqueue(request)
+            forwardSms(context, targetSlot, msg)
             return
 
         } catch (e: Exception) {
@@ -111,6 +110,76 @@ class SmsReceiver : BroadcastReceiver() {
         }
         if (slot == 0 || slot == 1) return slot
         return -1
+    }
+
+    private fun forwardAfterResolvingFromSmsList(context: Context, content: String, receiveTime: Long) {
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                var simSlot = -1
+                for (delayMillis in listOf(800L, 1000L, 1200L, 1400L, 1600L)) {
+                    delay(delayMillis)
+                    simSlot = resolveSimSlotFromSmsList(content, receiveTime)
+                    if (simSlot == 0 || simSlot == 1) break
+                }
+
+                val targetSlot = resolveForwardTargetSlot(simSlot)
+                if (targetSlot == -1) {
+                    Log.d(TAG, "skip async sms forward, simSlot=$simSlot phone is blank")
+                    return@launch
+                }
+                forwardSms(context, targetSlot, content)
+            } catch (e: Exception) {
+                Log.e(TAG, "async sms forward failed: ${e.message}")
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+
+    private fun resolveSimSlotFromSmsList(content: String, receiveTime: Long): Int {
+        return try {
+            val smsCode = extractSmsCode(content).orEmpty()
+            val keywords = listOf(content, smsCode, SMS_FORWARD_PREFIX).filter { it.isNotBlank() }.distinct()
+            for (keyword in keywords) {
+                val smsInfoList = PhoneUtils.getSmsInfoList(1, 10, 0, keyword)
+                val smsInfo = smsInfoList
+                    .filter {
+                        it.content == content ||
+                            (smsCode.isNotBlank() && it.content.startsWith(SMS_FORWARD_PREFIX) && it.content.contains(smsCode))
+                    }
+                    .minByOrNull { abs(it.date - receiveTime) }
+                val simSlot = smsInfo?.simId ?: -1
+                Log.d(TAG, "sms list keyword=$keyword simSlot=$simSlot, smsInfo=$smsInfo")
+                if (simSlot == 0 || simSlot == 1) return simSlot
+            }
+            -1
+        } catch (e: Exception) {
+            Log.e(TAG, "resolve sim slot from sms list failed: ${e.message}")
+            -1
+        }
+    }
+
+    private fun forwardSms(context: Context, simSlot: Int, content: String) {
+        val phoneNumber = getSmsForwardPhoneNumber(simSlot)
+        if (phoneNumber.isBlank()) {
+            Log.d(TAG, "skip sms forward, simSlot=$simSlot phone is blank")
+            return
+        }
+
+        val smsCode = extractSmsCode(content)
+        if (!smsCode.isNullOrBlank()) {
+            saveAndPostSmsCode(simSlot, smsCode)
+        }
+        val smsContent = smsCode ?: content
+
+        val request = OneTimeWorkRequestBuilder<SmsForwardWorker>().setInputData(
+            workDataOf(
+                SmsForwardWorker.KEY_PHONE_NUMBER to phoneNumber,
+                SmsForwardWorker.KEY_SMS_CONTENT to smsContent,
+            )
+        ).build()
+        WorkManager.getInstance(context).enqueue(request)
     }
 
     private fun getSubscriptionCandidate(intent: Intent): Pair<Int, Boolean> {
