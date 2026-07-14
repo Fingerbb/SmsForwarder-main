@@ -3,11 +3,12 @@
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.provider.Telephony
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import cn.ppps.forwarder.App
+import cn.ppps.forwarder.entity.SmsInfo
 import cn.ppps.forwarder.utils.EVENT_SMS_CODE_SIM1
 import cn.ppps.forwarder.utils.EVENT_SMS_CODE_SIM2
 import cn.ppps.forwarder.utils.Log
@@ -20,7 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Locale
 import kotlin.math.abs
 
 //短信广播
@@ -77,13 +77,13 @@ class SmsReceiver : BroadcastReceiver() {
                 return
             }
 
-            val slot = getIntExtra(intent, "slot", "simSlot", "phone", "slotId", "simSlotIndex", "android.telephony.extra.SLOT_INDEX")
-            val subscriptionCandidate = getSubscriptionCandidate(intent)
-            val subscription = subscriptionCandidate.first
-            Log.d(TAG, "slot = $slot, subscription = $subscription, isSimId = ${subscriptionCandidate.second}")
+            val slot = getIntExtra(intent, "slot")
+            val simId = getIntExtra(intent, "simId").takeIf { it != -1 } ?: slot
+            val subscription = getIntExtra(intent, "subscription").takeIf { it != -1 } ?: simId
+            Log.d(TAG, "slot = $slot, simId = $simId, subscription = $subscription")
 
             //卡槽id：-1=获取失败、0=卡槽1、1=卡槽2
-            val simSlot = resolveSimSlot(subscription, subscriptionCandidate.second, slot)
+            val simSlot = resolveSimSlot(subscription, slot)
             val targetSlot = resolveForwardTargetSlot(simSlot)
             if (targetSlot == -1) {
                 if (simSlot == -1) {
@@ -103,10 +103,25 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun resolveSimSlot(subscription: Int, isSimId: Boolean, slot: Int): Int {
+    private fun resolveSimSlot(subscription: Int, slot: Int): Int {
         if (subscription != -1) {
-            val simSlot = PhoneUtils.getSimId(subscription, isSimId)
-            if (simSlot == 0 || simSlot == 1) return simSlot
+            if (SettingUtils.subidSim1 > 0 && subscription == SettingUtils.subidSim1) return 0
+            if (SettingUtils.subidSim2 > 0 && subscription == SettingUtils.subidSim2) return 1
+
+            try {
+                if (App.SimInfoList.isEmpty()) {
+                    App.SimInfoList = PhoneUtils.getSimMultiInfo()
+                }
+                Log.d(TAG, "SimInfoList = ${App.SimInfoList}")
+
+                for (simInfo in App.SimInfoList.values) {
+                    if (simInfo.mSubscriptionId == subscription && simInfo.mSimSlotIndex != -1) {
+                        return simInfo.mSimSlotIndex
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "resolve sim slot failed: ${e.message}")
+            }
         }
         if (slot == 0 || slot == 1) return slot
         return -1
@@ -149,7 +164,7 @@ class SmsReceiver : BroadcastReceiver() {
                             (smsCode.isNotBlank() && it.content.startsWith(SMS_FORWARD_PREFIX) && it.content.contains(smsCode))
                     }
                     .minByOrNull { abs(it.date - receiveTime) }
-                val simSlot = smsInfo?.simId ?: -1
+                val simSlot = resolveSimSlotFromSmsInfo(smsInfo)
                 Log.d(TAG, "sms list keyword=$keyword simSlot=$simSlot, smsInfo=$smsInfo")
                 if (simSlot == 0 || simSlot == 1) return simSlot
             }
@@ -158,6 +173,18 @@ class SmsReceiver : BroadcastReceiver() {
             Log.e(TAG, "resolve sim slot from sms list failed: ${e.message}")
             -1
         }
+    }
+
+    private fun resolveSimSlotFromSmsInfo(smsInfo: SmsInfo?): Int {
+        if (smsInfo == null) return -1
+
+        if (smsInfo.subId > 1) {
+            val simSlot = resolveSimSlot(smsInfo.subId, -1)
+            if (simSlot == 0 || simSlot == 1) return simSlot
+        }
+        if (smsInfo.subId == 0 || smsInfo.subId == 1) return smsInfo.subId
+        if (smsInfo.simId == 0 || smsInfo.simId == 1) return smsInfo.simId
+        return -1
     }
 
     private fun forwardSms(context: Context, simSlot: Int, content: String) {
@@ -180,33 +207,6 @@ class SmsReceiver : BroadcastReceiver() {
             )
         ).build()
         WorkManager.getInstance(context).enqueue(request)
-    }
-
-    private fun getSubscriptionCandidate(intent: Intent): Pair<Int, Boolean> {
-        val manufacturer = Build.MANUFACTURER.lowercase(Locale.getDefault())
-        if (manufacturer.contains(Regex(pattern = "huawei|honor"))) {
-            val huaweiSimId = getIntExtra(intent, "sub_id")
-            if (huaweiSimId != -1) return Pair(huaweiSimId, true)
-        }
-
-        val subscription = getIntExtra(
-            intent,
-            "subscription",
-            "subscription_id",
-            "subscriptionId",
-            "android.telephony.extra.SUBSCRIPTION_INDEX",
-            "android.telephony.extra.SUBSCRIPTION_ID",
-            "android.telephony.extra.SUBSCRIPTION_IDENTITY"
-        )
-        if (subscription != -1) return Pair(subscription, false)
-
-        if (manufacturer.contains(Regex(pattern = "xiaomi|redmi"))) {
-            val xiaomiSubscription = getIntExtra(intent, "sim_id")
-            if (xiaomiSubscription != -1) return Pair(xiaomiSubscription, false)
-        }
-
-        val simId = getIntExtra(intent, "simId")
-        return if (simId > 1) Pair(simId, false) else Pair(-1, false)
     }
 
     private fun getIntExtra(intent: Intent, vararg keys: String): Int {
